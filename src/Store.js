@@ -17,5 +17,17 @@ export const selectCount = (state) => state.counter.value;
 const store = configureStore({
   reducer: { counter: counterSlice.reducer }
 });
+// Sync Redux state across tabs using BroadcastChannel
+const channel = new BroadcastChannel('redux-sync');
 
+// Send updated state to all tabs
+store.subscribe(() => {
+  channel.postMessage(store.getState());
+});
+
+// Receive updates in all tabs
+channel.onmessage = (event) => {
+  const newState = event.data;
+  store.dispatch({ type: 'GLOBAL_STATE_UPDATE', payload: newState });
+};
 export default store;
